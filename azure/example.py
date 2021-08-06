@@ -7,13 +7,18 @@ root.title('Azure')
 window_height = 530
 window_width = 800
 
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
+def center_screen():
+	""" gets the coordinates of the center of the screen """
+	global screen_height, screen_width, x_cordinate, y_cordinate
 
-x_cordinate = int((screen_width/2) - (window_width/2))
-y_cordinate = int((screen_height/2) - (window_height/2))
+	screen_width = root.winfo_screenwidth()
+	screen_height = root.winfo_screenheight()
+	x_cordinate = int((screen_width/2) - (window_width/2))
+	y_cordinate = int((screen_height/2) - (window_height/2))
+	root.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
 
-root.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+center_screen()
+
 
 style = ttk.Style(root)
 root.tk.call('source', 'azure.tcl')
