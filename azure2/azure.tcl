@@ -9,6 +9,15 @@ namespace eval ttk::theme::azure {
     variable version 0.1
     package provide ttk::theme::azure $version
     variable colors
+    # array set colors {
+    #     -fg             "#000000"
+    #     -bg             "#ffffff"
+    #     -disabledfg     "#737373"
+    #     -disabledbg     "#ffffff"
+    #     -selectfg       "#000000"
+    #     -selectbg       "#cccccc"
+    # }
+
     array set colors {
         -fg             "#000000"
         -bg             "#ffffff"
@@ -247,6 +256,25 @@ namespace eval ttk::theme::azure {
                 {pressed !selected} $I(checkbox-unchecked-active) \
                 active $I(checkbox-unchecked-hover) \
             ] -width 26 -sticky w
+
+
+        ttk::style configure TCheckbutton2 -padding 4
+
+        ttk::style element create Checkbutton2.indicator image \
+            [list $I(checkbox2-unchecked) \
+                {selected disabled} $I(checkbox2-checked-disabled) \
+                disabled $I(checkbox2-unchecked-disabled) \
+                {pressed alternate} $I(checkbox2-third-state-active) \
+                {active alternate} $I(checkbox2-third-state-hover) \
+                alternate $I(checkbox2-third-state) \
+                {pressed selected} $I(checkbox2-checked-active) \
+                {active selected} $I(checkbox2-checked-hover) \
+                selected $I(checkbox2-checked) \
+                {pressed !selected} $I(checkbox2-unchecked-active) \
+                active $I(checkbox2-unchecked-hover) \
+            ] -width 26 -sticky w
+
+
 
         # Switch
         ttk::style element create Switch.indicator image \
