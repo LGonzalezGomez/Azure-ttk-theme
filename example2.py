@@ -1,4 +1,5 @@
 # Importing Tkinter and Ttk
+# %%
 import tkinter as tk
 from tkinter import ttk
 
@@ -6,14 +7,15 @@ from tkinter import ttk
 root = tk.Tk()
 root.title('Azure')
 
+
 # Place the window in the center of the screen
 windowWidth = 800
 windowHeight = 530
 screenWidth = root.winfo_screenwidth()
 screenHeight = root.winfo_screenheight()
-xCordinate = int((screenWidth/2) - (windowWidth/2))
-yCordinate = int((screenHeight/2) - (windowHeight/2))
-root.geometry("{}x{}+{}+{}".format(windowWidth, windowHeight, xCordinate, yCordinate))
+xCordinate = 0 #int((screenWidth/2) - (windowWidth/2))
+yCordinate = 0 #int((screenHeight/2) - (windowHeight/2))
+root.geometry("{}x{}+{}+{}".format(screenWidth, screenHeight, xCordinate, yCordinate))
 
 # Create a style
 style = ttk.Style(root)
@@ -147,11 +149,11 @@ button = ttk.Button(root, text='Button', command=button_function)
 button.place(x=250, y=320)
 
 # Accentbutton
-accentbutton = ttk.Button(root, text='AccentButton', style='AccentButton', command=button_function)
+accentbutton = ttk.Button(root, text='AccentButton', style='Accentbutton', command=button_function)
 accentbutton.place(x=250, y=370)
 
 # ToggleButton
-togglebutton = ttk.Checkbutton(root, text='ToggleButton', style='ToggleButton', variable=f, offvalue=0, onvalue=1)
+togglebutton = ttk.Checkbutton(root, text='ToggleButton', style='Togglebutton', variable=f, offvalue=0, onvalue=1)
 togglebutton.place(x=250, y=420)
 
 # Switch
@@ -237,3 +239,4 @@ treeview.insert(parent=21, index='end', iid=24, text="Child", values=("Subitem 4
 treeview.insert(parent=19, index='end', iid=25, text="Child", values=("Subitem 4.3", "Value 4.3"))
 
 root.mainloop()
+# %%
