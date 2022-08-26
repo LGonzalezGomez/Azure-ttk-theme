@@ -47,7 +47,7 @@ IMAGE_EXT = ".png" if tk.TkVersion > 8.5 else ".gif"
 
 class MainFrame(tk.Frame):
 
-    def __init__(self, root):
+    def __init__(self, root, url_path):
         self.browser_frame = None
         self.navigation_bar = None
 
@@ -74,7 +74,7 @@ class MainFrame(tk.Frame):
         tk.Grid.columnconfigure(self, 0, weight=0)
 
         # BrowserFrame
-        self.browser_frame = BrowserFrame(self, self.navigation_bar)
+        self.browser_frame = BrowserFrame(self, url_path, self.navigation_bar)
         self.browser_frame.grid(row=1, column=0,
                                 sticky=(tk.N + tk.S + tk.E + tk.W))
         tk.Grid.rowconfigure(self, 1, weight=1)
@@ -129,7 +129,7 @@ class MainFrame(tk.Frame):
 
 class BrowserFrame(tk.Frame):
 
-    def __init__(self, master, navigation_bar=None):
+    def __init__(self, master, url_path, navigation_bar=None):
         self.navigation_bar = navigation_bar
         self.closing = False
         self.browser = None
@@ -138,13 +138,16 @@ class BrowserFrame(tk.Frame):
         self.bind("<FocusOut>", self.on_focus_out)
         self.bind("<Configure>", self.on_configure)
         self.focus_set()
+        self.url = url_path
  
     def embed_browser(self):
         window_info = cef.WindowInfo()
         rect = [0, 0, self.winfo_width(), self.winfo_height()]
         window_info.SetAsChild(self.get_window_handle(), rect)
+        print(f"file://{self.url}.html")
         self.browser = cef.CreateBrowserSync(window_info,
-                                             url="file://C:\\Users\\leogonzalez.VILARRIBA\\Documents\\GitHub\\Azure-ttk-theme\\examplesLeo\\Microlineplot_ruta_2022-08-17.html") #todo
+                                            # url = "file://file://C:/Users/leogonzalez.VILARRIBA/OneDrive - VILAR RIBA/Rutes_FFerrer/Microlineplot_ruta_2022-08-17.html")
+                                             url=f"file://{self.url}.html") #todo
         assert self.browser
         self.browser.SetClientHandler(LoadHandler(self))
         self.browser.SetClientHandler(FocusHandler(self))
@@ -370,7 +373,7 @@ if __name__ == '__main__':
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     root = tk.Tk()
-    app = MainFrame(root)
+    app = MainFrame(root, url_path = 'C:/Users/leogonzalez.VILARRIBA/Documents/GitHub/Azure-ttk-theme/examplesLeo/Microlineplot_ruta_2022-08-17')
     # Tk must be initialized before CEF otherwise fatal error (Issue #306)
     cef.Initialize()
     
