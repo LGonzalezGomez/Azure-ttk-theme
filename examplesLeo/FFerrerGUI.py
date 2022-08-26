@@ -93,7 +93,8 @@ def create_frame_summarySim(newWindow, num_vehicles, data, rutes_calcular):
             webbrowser.open(f'C:\\Users\\leogonzalez.VILARRIBA\\OneDrive - VILAR RIBA\\Rutes_FFerrer\\output\\Guessmicroroutes_solutions{y}-{m}-{d}.xlsx') 
 
             
-            map_path = f'C:/Users/leogonzalez.VILARRIBA/OneDrive - VILAR RIBA/Rutes_FFerrer/Microlineplot_ruta_{y}-{m}-{d}' #TODO: NO PUEDE HABER ESPACIOS EN EL NOMBRE!
+            # map_path = f'C:/Users/leogonzalez.VILARRIBA/OneDrive - VILAR RIBA/Rutes_FFerrer/Microlineplot_ruta_{y}-{m}-{d}' #TODO: NO PUEDE HABER ESPACIOS EN EL NOMBRE!
+            map_path =  'C:/Users/leogonzalez.VILARRIBA/Documents/GitHub/Azure-ttk-theme/examplesLeo/Microlineplot_ruta_2022-08-17'
             app = MainFrame(newWindow, url_path = map_path)
             # Tk must be initialized before CEF otherwise fatal error (Issue #306)
             cef.Initialize() 
