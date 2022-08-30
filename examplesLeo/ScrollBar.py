@@ -7,14 +7,50 @@ from datetime import datetime, date
 from HtmlWindow import *
 import webbrowser
 
-import time #TODO: Cambiar nombre vehicles en funció dels seleccionats
-
+import time 
 
 with open(Path("examplesLeo")/ "config_rutes.json", "r") as jsonfile: #Here we have the config file with the predefined routes
     rutes_predeterminades = json.load(jsonfile)
 
 
+class ScrollbarFrame(tk.Frame):
+    """
+    Extends class tk.Frame to support a scrollable Frame 
+    This class is independent from the widgets to be scrolled and 
+    can be used to replace a standard tk.Frame
+    """
+    def __init__(self, parent, **kwargs):
+        tk.Frame.__init__(self, parent, **kwargs)
 
+        # The Scrollbar, layout to the right
+        vsb = tk.Scrollbar(self, orient="vertical")
+        # vsb.pack(side="right", fill="y")
+        vsb.grid(row = 0, column= 1, sticky = "NESE")#, rowspan= 10
+
+
+
+        # The Canvas which supports the Scrollbar Interface, layout to the left
+        self.canvas = tk.Canvas(self, borderwidth=0)
+        # self.canvas.pack(side="left", fill="both", expand=True)
+        self.canvas.grid(row = 0, column= 0, rowspan=3, sticky = "NESE")#rowspan= 10, columnspan= 2, sticky = tk.NSEW)
+
+        # Bind the Scrollbar to the self.canvas Scrollbar Interface
+        self.canvas.configure(yscrollcommand=vsb.set)
+        vsb.configure(command=self.canvas.yview)
+
+        # The Frame to be scrolled, layout into the canvas
+        # All widgets to be scrolled have to use this Frame as parent
+        self.scrolled_frame = tk.Frame(self.canvas, background=self.canvas.cget('bg'))
+        self.canvas.create_window((4, 4), window=self.scrolled_frame, anchor="nw")
+
+        # Configures the scrollregion of the Canvas dynamically
+        self.scrolled_frame.bind("<Configure>", self.on_configure)
+
+    def on_configure(self, event):
+        """Set the scroll region to encompass the scrolled frame"""
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    
 readonlycombo_list = ['Selecciona ruta']
 for k in rutes_predeterminades.keys():
     readonlycombo_list.append(k)
@@ -28,14 +64,14 @@ photo = tk.PhotoImage(file = img_path / 'vehicle_5.png')
 root.wm_iconphoto(False, photo)
 
 # Place the window in the center of the screen
-windowWidth = 650
-windowHeight = 530
+windowWidth = 640
+windowHeight = 550
 screenWidth = root.winfo_screenwidth()
 screenHeight = root.winfo_screenheight()
 xCordinate = int((screenWidth/2) - (windowWidth/2))
 yCordinate = int((screenHeight/2) - (windowHeight/2))
 root.geometry("{}x{}+{}+{}".format(windowWidth, windowHeight, xCordinate, yCordinate))
-
+print(screenWidth, screenHeight )
 # Create a style
 style = ttk.Style(root)
 style.configure("Button", background="red")
@@ -55,16 +91,12 @@ pen_longroute = tk.IntVar(value = 1)
 a = tk.IntVar()
 b = tk.IntVar(value=1)
 c = tk.IntVar()
+cur_opt = 0
 
 rutes_seleccionades = [tk.IntVar(value = 0) for i in range(50)]
 
 solving_routes = False
 running = False
-
-def onFrameConfigure(canvas):
-    '''Reset the scroll region to encompass the inner frame'''
-    canvas.configure(scrollregion=canvas.bbox("all"))
-
 
 def create_frame_summarySim(newWindow, num_vehicles, data, rutes_calcular):
     global frame_sum
@@ -198,7 +230,7 @@ def create_frame1():
     entry_data = ttk.Entry(frame, textvariable = data, width = 10)
     entry_data.grid(row = 0, column= 1)
     readonlycombo = ttk.Combobox(frame, state='readonly', value=readonlycombo_list)
-    readonlycombo.current(0)
+    readonlycombo.current(1)
     readonlycombo.grid(row = 1, column = 0)
 
     label_vehicles = tk.Label(frame, text = "# Vehicles ")
@@ -233,108 +265,138 @@ def create_frame1():
 
 
     
-
+    def onFrameConfigure(canvas):
+        '''Reset the scroll region to encompass the inner frame'''
+        canvas.configure(scrollregion=canvas.bbox("all"))
 
     frame1 = tk.Frame(root)
-    frame1.pack(side = "right", anchor = "nw")
+
+    frame1.pack(side = "right", anchor = "nw", fill = "both")
+
     canvas = tk.Canvas(frame1, borderwidth=0)
     frame2 = tk.Frame(canvas)
-    frame2.pack()
-
     vsb = tk.Scrollbar(frame1, orient="vertical", command=canvas.yview)
     canvas.configure(yscrollcommand=vsb.set)
 
     vsb.pack(side="right", fill="y")
+    # vsb.grid(row=0, column=2, sticky="ns")
     canvas.pack(side="left", fill="both", expand=True)
-    # canvas_size = (0, 0, windowWidth, windowHeight)
-    canvas.create_window((2,2), window=frame2, anchor="nw")
+    # canvas.grid(row=0, column=0, rowspan=1, sticky="ns")
+    canvas.create_window((4,4), window=frame2, anchor="nw")
+
+
 
     # Create a Frame for the Checkbuttons
-    #TODO: Do not place them until a Route is selected!
     # checkframe = ttk.LabelFrame(frame1, text='Rutes seleccionades', width=210, height=500)
+
 
     # Checkbuttons
     def Buttone(premadeList, row, rowname):
+        global frame, num_vehicles
         if rowname not in premadeList:
             premadeList.append(str(rowname))
         rutes_seleccionades[row+1] = tk.IntVar(value = 1)
-        frame2 = tk.Frame(canvas)
-
-        vsb = tk.Scrollbar(frame1, orient="vertical", command=canvas.yview)
-        canvas.configure(yscrollcommand=vsb.set)
-
-        vsb.pack(side="right", fill="y")
-        canvas.pack(side="left", fill="both", expand=True)
-        # canvas_size = (0, 0, windowWidth, windowHeight)
-        canvas.create_window((2,2), window=frame2, anchor="nw")
         for widget in frame2.winfo_children():
-            widget.destroy()
+            print(widget)
+            if ~ ( isinstance(widget, tk.Scrollbar) or isinstance(widget,  tk.Canvas) ):
+                    widget.destroy()
         checkframe = ttk.LabelFrame(frame2, text='Rutes seleccionades', width=210, height=500)
         for row, checkBoxName in enumerate(premadeList):
-            c = ttk.Checkbutton(checkframe, text= str(checkBoxName), variable=rutes_seleccionades[row], offvalue=0, onvalue=1)
+            c = ttk.Checkbutton(checkframe, text= str(checkBoxName), variable=rutes_seleccionades[row], offvalue=0, onvalue=1, width = 10)
             c.grid(row = row, column = 0)
             # c.place(x = 20, y = 20+40*row)
-        new_row_text = ttk.Entry(checkframe, textvariable = new_ruta, width = 10)
+        new_row_text = ttk.Entry(checkframe, textvariable = new_ruta) #, width = 10
         new_row_text.grid(row = row+1, column= 0)
         b = ttk.Button(checkframe, text="Add", command= lambda: Buttone(premadeList, row, new_row_text.get()))
         b.grid(row = row+1, column = 1)
-        checkframe.grid(row = 0, column= 0)
+        # checkframe.grid(row = 0, column= 0)
+        checkframe.pack()#
 
         accentbutton = ttk.Button(frame2, text='Compute routes', style='Accentbutton', command=button_function)
-        accentbutton.grid(row =1, column= 0)
-    
+        # accentbutton.grid(row =1, column= 0)
+        accentbutton.pack()#side = "left", fill = "x")
+
+        #Change number vehicles
+        nombre_seleccionats = 0
+        
+        for ruta in rutes_seleccionades:
+            if (ruta.get() != 0):
+                nombre_seleccionats += 1
+
+        #Change left frame
+        # cur_opt = readonlycombo.current()
+        num_vehicles = tk.IntVar( value = nombre_seleccionats)
+        for widget in frame.winfo_children():
+            widget.destroy()
+            
+        label_data = tk.Label(frame, text = "Data ")
+        label_data.grid(row = 0, column= 0)
+        entry_data = ttk.Entry(frame, textvariable = data, width = 10)
+        entry_data.grid(row = 0, column= 1)
+        readonlycombo = ttk.Combobox(frame, state='readonly', value=readonlycombo_list)
+        readonlycombo.current(cur_opt)
+        readonlycombo.grid(row = 1, column = 0)
+
+        label_vehicles = tk.Label(frame, text = "# Vehicles ")
+        label_vehicles.grid(row = 2, column= 0)
+        entry_vehicles = ttk.Entry(frame, textvariable= num_vehicles, width = 10)
+        entry_vehicles.grid(row = 2, column= 1)
+
+        check_vehicles = ttk.Checkbutton(frame, text='Emprar tots els vehicles?', variable=all_vehicles, offvalue=0, onvalue=1)
+        check_vehicles.grid(row = 3, column= 0)
+
+        check_long = ttk.Checkbutton(frame, text='Penalitzar diferència temps entre rutes?', variable=pen_longroute, offvalue=0, onvalue=1)
+        check_long.grid(row = 4, column= 0)
+
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+
 
 
 
     def callbackFunc(event):
-        global premadeList, rutes_seleccionades
-        opt = readonlycombo.current()
-        print(opt)
-        
-        if readonlycombo.get() == "Nova ruta":
+        global premadeList, rutes_seleccionades, cur_opt
+        cur_opt = readonlycombo.current()
+        print(f"cur_opt = {cur_opt}")
+        if readonlycombo.get() == "Nova ruta": #TODO: Fer aixo!!
             print("FER NOVA RUTA")
             
-        elif opt != 0:
-            frame2 = tk.Frame(canvas)
+        elif cur_opt != 0:
             for widget in frame2.winfo_children():
-                widget.destroy()
-            frame2 = tk.Frame(canvas)
-
-            vsb = tk.Scrollbar(frame1, orient="vertical", command=canvas.yview)
-            canvas.configure(yscrollcommand=vsb.set)
-
-            vsb.pack(side="right", fill="y")
-            canvas.pack(side="left", fill="both", expand=True)
-            # canvas_size = (0, 0, windowWidth, windowHeight)
-            canvas.create_window((4,4), window=frame2, anchor="nw")
+                print(widget)
+                if ~ ( isinstance(widget, tk.Scrollbar) or isinstance(widget,  tk.Canvas) ):
+                    widget.destroy()
             premadeList = rutes_predeterminades[readonlycombo.get()]
-            checkframe = ttk.LabelFrame(frame2, text='Rutes seleccionades', width=210, height=500)
+            checkframe = ttk.LabelFrame(frame2, text='Rutes seleccionades', width=420, height=500)
             for row, checkBoxName in enumerate(premadeList):
                 rutes_seleccionades[row] = tk.IntVar(value = 1)
-                c = ttk.Checkbutton(checkframe, text= str(checkBoxName), variable=rutes_seleccionades[row], offvalue=0, onvalue=1)
+                c = ttk.Checkbutton(checkframe, text= str(checkBoxName), variable=rutes_seleccionades[row], offvalue=0, onvalue=1, width = 10)
                 c.grid(row = row, column= 0)
                 # c.place(x = 20, y = 20+40*row)
+                
             new_row_text = ttk.Entry(checkframe, textvariable = new_ruta, width = 10)
             new_row_text.grid(row = row+1, column= 0)
             b = ttk.Button(checkframe, text="Add", command= lambda: Buttone(premadeList, row, new_row_text.get()))
             b.grid(row = row+1, column = 1)
-            checkframe.grid(row = 0, column= 0)
+            # checkframe.grid(row = 0, column= 0, columnspan=2)
+            checkframe.pack()#
 
             accentbutton = ttk.Button(frame2, text='Compute routes', style='Accentbutton', command=button_function)
-            accentbutton.grid(row =1, column= 0)
-            frame2.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
-
-            for widget in frame2.winfo_children():
-                print(widget)
+            # accentbutton.grid(row =1, column= 0)
+            accentbutton.pack()#side = "left", fill = "x")
             
         else:
             for widget in frame2.winfo_children():
-                widget.destroy()
+                if ~ ( isinstance(widget, tk.Scrollbar) or isinstance(widget,  tk.Canvas) ):
+                    widget.destroy()
 
+
+    def _on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120) ), "units")
 
     readonlycombo.bind("<<ComboboxSelected>>", callbackFunc)
-    frame2.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
-
+    frame1.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
+    root.bind_all("<MouseWheel>", _on_mousewheel)
     
 premadeList = []
 create_frame1()
